@@ -1,0 +1,131 @@
+---
+layout:     post
+title:      YII日记
+subtitle:   琐碎知识
+date:       2017-10-10
+author:     Heber
+header-img: img/post-bg-hacker.jpg
+catalog: true
+tags:
+    - YII
+    - 日记
+---
+
+
+## 视图安全
+
+与mysql注入安全问题类似，YII也可以对用户输入内容进行处理以防止注入攻击。
+
+令$data['name'] = 'lee<script>alert(4);</script>'，这里是一个js的弹窗，如果不加处理，代码就会被当成js处理而出现一个弹窗。
+1.使用命名空间为yii\helpers\Html的Html下的encode方法，处理后js代码就会被转义成普通字符串，而不是js脚本。
+```objc
+<?php
+	use yii\helpers\Html;
+?>
+<h1><?=Html::encode($name);?></h1>
+```
+2.使用命名空间为yii\helpers\HtmlPurifier的HtmlPurifier下的process方法，处理后js代码就会过滤掉，只剩下lee这个普通串。
+```objc
+<?php
+	use yii\helpers\HtmlPurifier;
+?>
+<h1><?=HtmlPurifier::process($name);?></h1>
+```
+
+## 布局文件
+
+碰到需要重复使用的代码时，可以存为布局文件，多次调用。
+1.在/view/layout下放置布局文件common.php，文件内容如下：
+```objc
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title></title>
+</head>
+<body>
+<h1><?=$content;?></h1>
+</body>
+</html>
+```
+2.在控制器中引用布局文件
+```objc
+public $layout = 'common';
+```
+3.通过render方法（render方法有第二个参数可以用来传值给被调用的文件）将视图文件index.php的内容存入$content(默认)，且把$content传到布局文件中，输出布局文件。
+```objc
+$this->render('index');
+```
+这是我学习MVC的视频，感谢幕课网pengcheng的良心教学[MVC架构模式分析与设计](http://www.imooc.com/learn/69)
+
+## 数据库
+
+类似于微型框架，YII的数据库账户、密码等信息也是在config文件中配置的，具体在config文件夹下的db.php文件。
+```objc
+<?php
+
+return [
+    'class' => 'yii\db\Connection',
+    'dsn' => 'mysql:host=localhost;dbname=yii2',
+    'username' => 'root',
+    'password' => 'root',
+    'charset' => 'utf8',
+];
+```
+之后新建数据库模块继承自命名空间为yii\db\ActiveRecord的ActiveRecord类，注意新建模块也要为它设置命名空间
+```objc
+<?php
+namespace app\models;
+use yii\db\ActiveRecord;
+
+class Test extends ActiveRecord{
+
+}
+```
+然后在控制器中就可以使用各种封装好的数据库方法了，这里选几种常用的，更多可参考yii手册。
+```objc
+<?php
+	namespace app\controllers;
+	use yii\web\Controller;
+	use app\models\Test;
+
+	class HelloController extends Controller{
+		public function actionIndex(){
+			//最基础、最通用的直接执行完整sql语句
+			$sql = 'select * from test where id = 1';
+			$result = Test::findBySql($sql)->all();
+			//条件查询,id=1
+			$result_1 = Test::find()->where(['id'=>1])->all();
+			//条件查询,id=1 且结果存为数组
+			$result_2 = Test::find()->where(['id'=>1])->asArray->all();
+			//条件查询,id>1
+			$result_3 = Test::find()->where(['>','id',1])->all(); 
+			//条件查询,3>=id>=1
+			$result_4 = Test::find()->where(['between','id',1,3])->all(); 
+			//条件查询,id中有1的
+			$result_5 = Test::find()->where(['like','id',1])->all(); 
+		}
+		
+	}
+?>
+```
+还有删除操作
+```objc
+<?php
+	namespace app\controllers;
+	use yii\web\Controller;
+	use app\models\Test;
+
+	class HelloController extends Controller{
+		public function actionIndex(){
+			$sql = 'select * from test where id = 1';
+			$result = Test::findBySql($sql)->all();
+			//删除
+			$result[0]->delete();
+			//另一种删除
+			Test::deleteAll('id>0');
+		}
+		
+	}
+?>
+```
