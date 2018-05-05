@@ -4,7 +4,7 @@ title:      Just For Joy
 subtitle:   
 date:       2018-4-28
 author:     Heber
-header-img: img/post-bg-hacker.jpg
+header-img: img/post-sample-image.jpg
 catalog: true
 tags:
     - have fun
