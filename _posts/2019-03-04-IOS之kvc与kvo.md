@@ -8,10 +8,11 @@ header-img: img/post-bg-miui6.jpg
 catalog: true
 tags:
     - IOS
+    - UI基础
 ---
 
 
-#KVC——key value coding（键值编程）
+# KVC——key value coding（键值编程）
 
 1.通过kvc方式赋值的变量在输出时能够提供自动类型转换，如int=>float
 
@@ -31,7 +32,7 @@ tags:
 
 5.kvc可以使用valueForKeyPath取出对象数组里所有对象的某个键对应的值。
 
-#KVO——key value observing（键值监听）
+# KVO——key value observing（键值监听）
 
 1.kvo就是监听键值对的改变，通常与scollview之类的控件配合。
 
